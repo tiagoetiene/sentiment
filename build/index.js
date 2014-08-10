@@ -11,6 +11,9 @@
 var async   = require('async'),
     fs      = require('fs');
 
+var accents     = "áéíóúàâêôãõÁÉÍÓÚÀÂÊÔÃÕ";
+var no_accents  = "aeiouaaeoaoAEIOUAAEOAO";
+
 /**
  * Read AFINN data from original format
  */
@@ -31,6 +34,46 @@ fs.readFile(__dirname + '/AFINN.txt', function (err, data) {
         // Write out JSON
         fs.writeFile(
             __dirname + '/AFINN.json', 
+            JSON.stringify(hash), 
+        function (err) {
+            if (err) throw new Error(err);
+            console.log('Complete.');
+        });
+    });
+});
+
+/**
+ * Read SentiLex data from original format. SentiLex will provide 
+ */
+fs.readFile(__dirname + '/SentiLex-flex-PT01.txt', function (err, data) {
+    // Storage object
+    var hash = new Object(null);
+
+    // Split lines
+    var lines = data.toString().split(/\n/);
+    // console.dir(lines);
+    async.forEach(lines, function (obj, callback) {
+        var items = obj.split(/;/);
+        var keys = items[0].split(/[,\.]/);
+        var value = items[3].split(/=/)[1];
+        console.assert(isNaN(value) === false && isFinite(value) === true);
+        hash[keys[0]] = Number(value);
+        hash[keys[1]] = Number(value);
+
+        for(var i = 0; i < accents.length; ++i) {
+            keys[0] = keys[0].replace(accents[i], no_accents[i]);
+            keys[1] = keys[1].replace(accents[i], no_accents[i]);
+        }
+        hash[keys[0]] = Number(value);
+        hash[keys[1]] = Number(value);
+
+        callback();
+    }, function (err) {
+        if (err) throw new Error(err);
+
+        // Write out JSON
+        fs.writeFile(
+            __dirname + '/SentiLex-flex-PT01.json', 
             JSON.stringify(hash), 
         function (err) {
             if (err) throw new Error(err);

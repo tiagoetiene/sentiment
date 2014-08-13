@@ -45,7 +45,7 @@ fs.readFile(__dirname + '/AFINN.txt', function (err, data) {
 /**
  * Read SentiLex data from original format. SentiLex will provide 
  */
-fs.readFile(__dirname + '/SentiLex-flex-PT01.txt', function (err, data) {
+fs.readFile(__dirname + '/SentiLex-flex-PT02.txt', function (err, data) {
     // Storage object
     var hash = new Object(null);
 
@@ -54,8 +54,10 @@ fs.readFile(__dirname + '/SentiLex-flex-PT01.txt', function (err, data) {
     // console.dir(lines);
     async.forEach(lines, function (obj, callback) {
         var items = obj.split(/;/);
-        var keys = items[0].split(/[,\.]/);
-        var value = items[3].split(/=/)[1];
+        var keys = items[0].split(/[,.]/);
+        var value_1 = Number(items[3].split(/=/)[1]);
+        var value_2 = Number(items[4].split(/=/)[1]);
+        var value = value_1 + ((isNaN(value_2) === false) ? value_2 : 0);
         console.assert(isNaN(value) === false && isFinite(value) === true);
         hash[keys[0]] = Number(value);
         hash[keys[1]] = Number(value);
